@@ -42,6 +42,7 @@
 #define __MAIN_H__
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -49,8 +50,6 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define LED_Pin GPIO_PIN_2
-#define LED_GPIO_Port GPIOE
 #define PC14_OSC32_IN_Pin GPIO_PIN_14
 #define PC14_OSC32_IN_GPIO_Port GPIOC
 #define PC15_OSC32_OUT_Pin GPIO_PIN_15

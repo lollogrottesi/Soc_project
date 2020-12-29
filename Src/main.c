@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -99,6 +100,9 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   MX_UART5_Init();
+  MX_I2C3_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
   /* USER CODE END 2 */
