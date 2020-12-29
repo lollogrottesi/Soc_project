@@ -37,7 +37,7 @@
 
 /* USER CODE BEGIN 0 */
 extern uint8_t screen;
-uint8_t rcvBuffer[20];
+extern uint8_t uartRx;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -90,16 +90,20 @@ void TIM1_CC_IRQHandler(void)
 void UART5_IRQHandler(void)
 {
   /* USER CODE BEGIN UART5_IRQn 0 */
-	HAL_UART_Receive(&huart5, rcvBuffer, sizeof(rcvBuffer),  HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart5, rcvBuffer, sizeof(rcvBuffer), HAL_MAX_DELAY);
   /* USER CODE END UART5_IRQn 0 */
   HAL_UART_IRQHandler(&huart5);
   /* USER CODE BEGIN UART5_IRQn 1 */
-
   /* USER CODE END UART5_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == UART5)
+  {
+	  HAL_UART_Transmit(&huart5, &uartRx, sizeof(uartRx), HAL_MAX_DELAY);
+		HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
+  }
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

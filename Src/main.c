@@ -52,6 +52,7 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 uint8_t screen = 0;
+uint8_t uartRx;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,8 +75,8 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint8_t pData[20] = "Hello world!";
-	uint8_t rcvBuffer[20];
+	//uint8_t pData[20] = "Hello world!";
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -99,17 +100,14 @@ int main(void)
   MX_TIM1_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-	
+	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		//HAL_UART_Transmit(&huart5, pData, sizeof(pData), HAL_MAX_DELAY);
-		while (HAL_UART_Receive(&huart5, rcvBuffer, sizeof(rcvBuffer), HAL_MAX_DELAY) != HAL_OK);
-		HAL_UART_Transmit(&huart5, pData, sizeof(pData), HAL_MAX_DELAY);
-		HAL_Delay(1000);
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
