@@ -45,7 +45,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "arm_math.h"	/* PID */
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -54,6 +54,11 @@
 /* Private variables ---------------------------------------------------------*/
 uint8_t screen = 0;
 uint8_t uartRx;
+#define PID_PARAM_KP        100            /* Proporcional */
+#define PID_PARAM_KI        0.025        /* Integral */
+#define PID_PARAM_KD        20            /* Derivative */
+uint16_t TEMP_CURRENT = 20;	/* Valore letto di temperatura */
+uint16_t TEMP_WANT = 50; /* Valore desiderato di temperatura */
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,6 +71,29 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN 0 */
 
+/* Inizializzazione del PID controller */
+void arm_pid_init_f32(
+  arm_pid_instance_f32 * S,
+  int32_t resetStateFlag)
+{
+
+  /* Derived coefficient A0 */
+  S->A0 = S->Kp + S->Ki + S->Kd;
+
+  /* Derived coefficient A1 */
+  S->A1 = (-S->Kp) - ((float32_t) 2.0 * S->Kd);
+
+  /* Derived coefficient A2 */
+  S->A2 = S->Kd;
+
+  /* Check whether state needs reset or not */
+  if(resetStateFlag)
+  {
+    /* Clear the state buffer.  The size will be always 3 samples */
+    memset(S->state, 0, 3u * sizeof(float32_t));
+  }
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -105,6 +133,18 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
+	/* PID */
+	float pid_error;
+	float duty = 0;
+	arm_pid_instance_f32 PID;
+	
+	PID.Kp = PID_PARAM_KD;
+	PID.Ki = PID_PARAM_KI;
+	PID.Kd = PID_PARAM_KD;
+	
+	arm_pid_init_f32(&PID, 1);
+	/* Buffer for PID state */
+	char buffer_to_print[150];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,8 +153,20 @@ int main(void)
   {
 
   /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
+		
+		pid_error = TEMP_CURRENT - TEMP_WANT;
+		duty = arm_pid_f32(&PID, pid_error);
+		if (duty > 100) {
+				duty = 100;
+		} else if (duty < 0) {
+				duty = 0;
+		}
+		sprintf(buffer_to_print, "Expected:   %2.3f C\nActual:     %2.3f C\nError:      %2.3f C\nDuty cycle: %3.2f %%\n----\n", (double)TEMP_WANT, (double)TEMP_CURRENT, pid_error, duty);
+		HAL_UART_Transmit(&huart5, (uint8_t *)buffer_to_print, sizeof(buffer_to_print), HAL_MAX_DELAY);
+		HAL_Delay(2500);
+		// Aumento la temperatura rilevata ad ogni ciclo per vedere come cambia il duty cycle
+		TEMP_CURRENT += 1;
+		/* USER CODE BEGIN 3 */
 
   }
   /* USER CODE END 3 */
