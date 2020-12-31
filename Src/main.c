@@ -46,6 +46,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "arm_math.h"	/* PID */
+#include "bmp180.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -59,6 +60,7 @@ uint8_t uartRx;
 #define PID_PARAM_KD        20            /* Derivative */
 uint16_t TEMP_CURRENT = 20;	/* Valore letto di temperatura */
 uint16_t TEMP_WANT = 50; /* Valore desiderato di temperatura */
+bmp_t bmp_measure;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,7 +116,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+	
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -132,6 +134,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+	bmp_init (&bmp_measure);
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
 	/* PID */
 	float pid_error;
@@ -145,16 +148,21 @@ int main(void)
 	arm_pid_init_f32(&PID, 1);
 	/* Buffer for PID state */
 	char buffer_to_print[150];
+	float temperature;
+	uint8_t i2cBuffer[2];
+	
   /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		temperature = get_temp(&bmp_measure);
+		sprintf(buffer_to_print, "Temperature: %f \r", temperature);
+		HAL_UART_Transmit(&huart5, (uint8_t*)buffer_to_print, sizeof(buffer_to_print), HAL_MAX_DELAY);
 
   /* USER CODE END WHILE */
-		
-		pid_error = TEMP_CURRENT - TEMP_WANT;
+		//NICO PID.
+		/*pid_error = TEMP_CURRENT - TEMP_WANT;
 		duty = arm_pid_f32(&PID, pid_error);
 		if (duty > 100) {
 				duty = 100;
@@ -162,10 +170,10 @@ int main(void)
 				duty = 0;
 		}
 		sprintf(buffer_to_print, "Expected:   %2.3f C\nActual:     %2.3f C\nError:      %2.3f C\nDuty cycle: %3.2f %%\n----\n", (double)TEMP_WANT, (double)TEMP_CURRENT, pid_error, duty);
-		HAL_UART_Transmit(&huart5, (uint8_t *)buffer_to_print, sizeof(buffer_to_print), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart5, (uint8_t*)buffer_to_print, sizeof(buffer_to_print), HAL_MAX_DELAY);
 		HAL_Delay(2500);
 		// Aumento la temperatura rilevata ad ogni ciclo per vedere come cambia il duty cycle
-		TEMP_CURRENT += 1;
+		TEMP_CURRENT += 1;*/
 		/* USER CODE BEGIN 3 */
 
   }

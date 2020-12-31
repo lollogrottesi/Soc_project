@@ -8,7 +8,7 @@ test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 test_renode\main.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
 test_renode\main.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f429xx.h
 test_renode\main.o: ../Drivers/CMSIS/Include/core_cm4.h
-test_renode\main.o: F:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+test_renode\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 test_renode\main.o: ../Drivers/CMSIS/Include/core_cmInstr.h
 test_renode\main.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 test_renode\main.o: ../Drivers/CMSIS/Include/core_cmFunc.h
@@ -16,7 +16,7 @@ test_renode\main.o: ../Drivers/CMSIS/Include/core_cmSimd.h
 test_renode\main.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
 test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-test_renode\main.o: F:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+test_renode\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h
 test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h
 test_renode\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h
@@ -39,5 +39,6 @@ test_renode\main.o: ../Inc/usart.h
 test_renode\main.o: ../Inc/gpio.h
 test_renode\main.o: ../Drivers/CMSIS/Include/arm_math.h
 test_renode\main.o: ../Drivers/CMSIS/Include/core_cm4.h
-test_renode\main.o: F:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
-test_renode\main.o: F:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+test_renode\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+test_renode\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+test_renode\main.o: ../Inc/bmp180.h

@@ -1,0 +1,10 @@
+externalButton: Miscellaneous.Button @ gpioPortA
+    -> gpioPortA@3
+
+externalLed: Miscellaneous.LED @ gpioPortA
+
+gpioPortA:
+    5 -> externalLed@0
+
+sensorA: Sensors.BMP180 @ i2c3 0x00
+
