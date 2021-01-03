@@ -56,11 +56,10 @@
 uint8_t screen = 0;
 uint8_t uartRx;
 float temperature;
+float pv = 45.0;
 #define PID_PARAM_KP        100            /* Proporcional */
 #define PID_PARAM_KI        0.025        /* Integral */
 #define PID_PARAM_KD        20            /* Derivative */
-uint16_t TEMP_CURRENT = 20;	/* Valore letto di temperatura */
-uint16_t TEMP_WANT = 50; /* Valore desiderato di temperatura */
 bmp_t bmp_measure;
 extern uint8_t status;
 /* USER CODE END PV */
@@ -158,7 +157,15 @@ int main(void)
   while (1)
   {
 		temperature = get_temp(&bmp_measure);
-
+		
+		pid_error = temperature - pv;
+		duty = arm_pid_f32(&PID, pid_error);
+		if (duty > 100) {
+				duty = 100;
+		} else if (duty < 0) {
+				duty = 0;
+		}
+		
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
