@@ -1,5 +1,6 @@
 --cpu=Cortex-M4.fp
 "test_renode\startup_stm32f429xx.o"
+"test_renode\bmp180.o"
 "test_renode\main.o"
 "test_renode\gpio.o"
 "test_renode\i2c.o"
@@ -7,7 +8,6 @@
 "test_renode\usart.o"
 "test_renode\stm32f4xx_it.o"
 "test_renode\stm32f4xx_hal_msp.o"
-"test_renode\bmp180.o"
 "test_renode\stm32f4xx_hal_i2c.o"
 "test_renode\stm32f4xx_hal_i2c_ex.o"
 "test_renode\stm32f4xx_hal_tim.o"

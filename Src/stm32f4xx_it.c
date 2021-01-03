@@ -4,7 +4,7 @@
   * @brief   Interrupt Service Routines.
   ******************************************************************************
   *
-  * COPYRIGHT(c) 2020 STMicroelectronics
+  * COPYRIGHT(c) 2021 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -38,10 +38,12 @@
 /* USER CODE BEGIN 0 */
 extern uint8_t screen;
 extern uint8_t uartRx;
+extern float temperature;
+char screen_message[150];
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim6;
 extern UART_HandleTypeDef huart5;
 
 /******************************************************************************/
@@ -71,20 +73,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-* @brief This function handles TIM1 capture compare interrupt.
-*/
-void TIM1_CC_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM1_CC_IRQn 0 */
-
-  /* USER CODE END TIM1_CC_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim1);
-  /* USER CODE BEGIN TIM1_CC_IRQn 1 */
-
-  /* USER CODE END TIM1_CC_IRQn 1 */
-}
-
-/**
 * @brief This function handles UART5 global interrupt.
 */
 void UART5_IRQHandler(void)
@@ -96,14 +84,61 @@ void UART5_IRQHandler(void)
   /* USER CODE END UART5_IRQn 1 */
 }
 
+/**
+* @brief This function handles TIM6 global interrupt, DAC1 and DAC2 underrun error interrupts.
+*/
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+
+  /* USER CODE END TIM6_DAC_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
+/*
+ *Uart interrupt callback routine.
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == UART5)
   {
+		switch (screen) {
+			case 0:
+				if (uartRx == '1')
+					screen = 1;
+			  else if (uartRx == '2')
+					screen = 2;
+			  else
+					screen = 0;
+				break;
+					
+		}
 	  HAL_UART_Transmit(&huart5, &uartRx, sizeof(uartRx), HAL_MAX_DELAY);
 		HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
   }
+}
+/*
+ *Timer interrupt callback routine.
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
+
+	if (htim->Instance == TIM6){
+		switch (screen) {
+			case 0:
+				sprintf(screen_message, "Select an operation: (1)Show Current Temperature and Fan status(2)Insert target temperature\r");
+				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+				break;
+			case 1:
+				sprintf(screen_message, "Temperature : %f [Celsius]                                                                   \r", temperature);
+				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+				break;
+		}
+	}
+	HAL_TIM_Base_Start_IT(htim);
 }
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

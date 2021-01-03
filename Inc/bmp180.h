@@ -12,7 +12,7 @@
 
 /* Chip-id [R/O] (register D0h): This value is fixed to 0x55,
  * and can be used to check whether communication is functioning. */
-#define BMP_CHIP_ID_REG			      		(0xD0)
+#define BMP_CHIP_ID_REG			    (0xD0)
 #define BMP_CHIP_ID_VAL					(0x55)
 
 /* Measurement control [R/W] (register F4h):
