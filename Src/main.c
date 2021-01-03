@@ -61,7 +61,6 @@ float pv = 45.0;
 #define PID_PARAM_KI        0.025        /* Integral */
 #define PID_PARAM_KD        20            /* Derivative */
 bmp_t bmp_measure;
-extern uint8_t status;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,6 +134,7 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 	bmp_init (&bmp_measure);
+	//HAL_UART_Transmit(&huart5, (uint8_t*)"Welcome Programmable Industrial Oven\r\n", 38, HAL_MAX_DELAY);
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
 	/* PID */
@@ -147,9 +147,7 @@ int main(void)
 	PID.Kd = PID_PARAM_KD;
 	
 	arm_pid_init_f32(&PID, 1);
-	/* Buffer for PID state */
-	char buffer_to_print[150];
-	
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
