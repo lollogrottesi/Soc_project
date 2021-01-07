@@ -65,13 +65,13 @@ void bmp_init (bmp_t * bmp)
 * @param[in] - pointer to struct of type bmp_calib_param_t
 * @return    - Floating point temperature value.
 */
-float get_temp(bmp_t * bmp){
+float get_temp(bmp_t * bmp, uint8_t bmp_addr){
 	uint8_t i2cBuffer[2];
 	i2cBuffer[0] = BMP_SET_TEMP_CONV;
-	HAL_I2C_Mem_Write( &hi2c3, 0x00, BMP_CTRL_REG, 1, &i2cBuffer[0], 1, BMP_I2C_TIMEOUT );
+	HAL_I2C_Mem_Write( &hi2c3, bmp_addr, BMP_CTRL_REG, 1, &i2cBuffer[0], 1, BMP_I2C_TIMEOUT );
 	HAL_Delay (BMP_TEMP_CONV_TIME);
-	HAL_I2C_Mem_Read ( &hi2c3, 0x00, 0xF6, 1, &i2cBuffer[0], 1, BMP_I2C_TIMEOUT );
-	HAL_I2C_Mem_Read ( &hi2c3, 0x00, 0xF7, 1, &i2cBuffer[1], 1, BMP_I2C_TIMEOUT );
+	HAL_I2C_Mem_Read ( &hi2c3, bmp_addr, BMP_DATA_MSB_ADDR, 1, &i2cBuffer[0], 1, BMP_I2C_TIMEOUT );
+	HAL_I2C_Mem_Read ( &hi2c3, bmp_addr, BMP_DATA_LSB_ADDR, 1, &i2cBuffer[1], 1, BMP_I2C_TIMEOUT );
 	//Compute non compensated temperature.
 	int32_t uncomp_tmp = (i2cBuffer[0] << BYTE_SHIFT) | i2cBuffer[1];
 	//Compensate the temperature.

@@ -134,7 +134,9 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 	bmp_init (&bmp_measure);
-	//HAL_UART_Transmit(&huart5, (uint8_t*)"Welcome Programmable Industrial Oven\r\n", 38, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"Welcome Programmable Industrial Oven\r\n", 38, HAL_MAX_DELAY);
+	//sprintf(screen_message, "Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed\r\n");
+	HAL_UART_Transmit(&huart5, (uint8_t*)"Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed\r\n", 110, HAL_MAX_DELAY);
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
 	/* PID */
@@ -147,14 +149,23 @@ int main(void)
 	PID.Kd = PID_PARAM_KD;
 	
 	arm_pid_init_f32(&PID, 1);
-
+	float tmp_sensor[4];
+	//char screen_message[150];
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		temperature = get_temp(&bmp_measure);
+		tmp_sensor[0] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_A);
+		HAL_Delay(25);
+		tmp_sensor[1] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_B);
+		HAL_Delay(25);
+		tmp_sensor[2] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_C);
+		HAL_Delay(25);
+		tmp_sensor[3] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_D);
+		
+		temperature = (tmp_sensor[0] + tmp_sensor[1] + tmp_sensor[2] + tmp_sensor[3])/4;
 		
 		pid_error = temperature - pv;
 		duty = arm_pid_f32(&PID, pid_error);

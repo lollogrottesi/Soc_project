@@ -2,16 +2,24 @@
 :description: This script runs Contiki on STM32F4 Discovery.
 
 using sysbus
-emulation CreateEnvironment "env"
-env Temperature 40.0
+emulation CreateEnvironment "envA"
+emulation CreateEnvironment "envB"
+emulation CreateEnvironment "envC"
+emulation CreateEnvironment "envD"
+envA Temperature 40.0
+envB Temperature 20.0
+envC Temperature 10.0
+envD Temperature 65.0
 $name?="STM32F4_Discovery"
 mach create $name
 machine LoadPlatformDescription @platforms/boards/stm32f4_discovery-kit.repl
 emulation CreateServerSocketTerminal 3456 "term"
 connector Connect sysbus.uart5 term
 
-sysbus.i2c3.sensorA SetEnvironment env
-
+sysbus.i2c3.sensorA SetEnvironment envA
+sysbus.i2c3.sensorB SetEnvironment envB
+sysbus.i2c3.sensorC SetEnvironment envC
+sysbus.i2c3.sensorD SetEnvironment envD
 $bin?="C:\Users\lorenzo\Documents\Universit\magistrale\System on chip architecture\TEST_RENODE\MDK-ARM\TEST_RENODE\TEST_RENODE.axf"
 
 macro reset

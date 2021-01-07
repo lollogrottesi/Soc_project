@@ -7,4 +7,6 @@ gpioPortA:
     5 -> externalLed@0
 
 sensorA: Sensors.BMP180 @ i2c3 0x00
-
+sensorB: Sensors.BMP180 @ i2c3 0x01
+sensorC: Sensors.BMP180 @ i2c3 0x02
+sensorD: Sensors.BMP180 @ i2c3 0x03

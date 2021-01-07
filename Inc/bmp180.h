@@ -21,8 +21,8 @@
  *               and is reset to “0” after conversion is complete
  * <7:6> - OSS : Controls the oversampling ratio of the pressure measurement
  */
-#define BMP_CTRL_REG	         	       		(0xF4)
-#define BMP_CTRL_SCO_BIT(reg)				((reg & 0x20) >> 5)
+#define BMP_CTRL_REG	         	      (0xF4)
+#define BMP_CTRL_SCO_BIT(reg)				  ((reg & 0x20) >> 5)
 #define BMP_CTRL_OSS_MASK(oss)				(oss = (oss & 0x3) << 6)
 
 #define BMP_OSS0_CONV_TIME				(5U)
@@ -33,11 +33,11 @@
 /* Soft reset [W/O] (register E0h):
  * If set to 0xB6, will perform the same sequence as power on reset. */
 #define BMP_SOFT_RST_REG 	                	(0xE0)
-#define BMP_SOFT_RST_VAL  	                	(0xB6)
+#define BMP_SOFT_RST_VAL  	                (0xB6)
 
 // Calibration data [R/O] (register AAh up to BFh):
 #define BMP_CALIB_ADDR  	                	(0xAA)
-#define BMP_CALIB_DATA_SIZE				(22U)
+#define BMP_CALIB_DATA_SIZE									(22U)
 
 // Device I2C addr register [R/O]: write EEh, read EFh:
 #define BMP_READ_ADDR	                    	(0xEF)
@@ -48,12 +48,12 @@
 // BMP measurmenet regs
 #define BMP_DATA_MSB_ADDR	                	(0xF6)
 #define BMP_DATA_LSB_ADDR	                	(0xF7)
-#define BMP_DATA_XLSB_ADDR	                	(0xF8)
+#define BMP_DATA_XLSB_ADDR	                (0xF8)
 
 // Temp. measurement :
 #define BMP_SET_TEMP_CONV		            	(0x2E)
 
-#define BMP_TEMP_CONV_TIME				(5U)
+#define BMP_TEMP_CONV_TIME						(5U)
 #define BMP_MIN_TEMP_THRESHOLD				(-40)
 #define BMP_MAX_TEMP_THRESHOLD				(85U)
 
@@ -66,7 +66,11 @@
 #define BMP_MIN_ALT_THRESHOLD				(-500)	// m. relating to sea level)
 #define BMP_MAX_ALT_THRESHOLD				(9000U)	// m. relating to sea level)
 
-
+//I2C addresses are shifted one bit left with respect the original one.
+#define BMP_ADDR_SENSOR_A									(0x00)
+#define BMP_ADDR_SENSOR_B									((0x01) << 1)
+#define BMP_ADDR_SENSOR_C									((0x02) << 1)
+#define BMP_ADDR_SENSOR_D									((0x03) << 1)
 
 struct bmp_calib_param_t
 {
@@ -87,7 +91,7 @@ struct measure_data_t
 {
 	float temp;
 	int32_t press;
-	/* for uncompensated values do not use below fields: */
+	// for uncompensated values do not use below fields: 
 	int32_t B5;
 	float altitude;
 };
@@ -137,5 +141,5 @@ void bmp_init (bmp_t * bmp);
 * @param[in] - pointer to struct of type bmp_calib_param_t
 * @return    - None.
 */
-float get_temp(bmp_t * bmp);
+float get_temp(bmp_t * bmp, uint8_t bmp_addr);
 #endif /* BMP180_H_ */

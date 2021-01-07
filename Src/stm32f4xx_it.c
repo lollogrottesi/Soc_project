@@ -104,6 +104,13 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void clearBuffer() {
+	for (int i=0;i<sizeof(screen_message);i++){
+		screen_message[i] = 0;
+	}
+}
+
 /*
  *Uart interrupt callback routine.
  */
@@ -156,6 +163,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					idx ++;
 				} else if(idx == 2) {
 					fan_speed = uartRxBuffer[0]*100 + uartRxBuffer[1]*10 + uartRxBuffer[2];
+					if (fan_speed > 100)
+						fan_speed = 100;
 					idx = 0;
 					screen = 1;
 					uartRxBuffer[0] = 0;
@@ -179,24 +188,29 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 	if (htim->Instance == TIM6){
 		switch (screen) {
 			case 0:
-				sprintf(screen_message, "Select an operation: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed\r");
+				clearBuffer();	
+				sprintf(screen_message, "Select an operation                                                   \r");
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 			case 1:
-				sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage]                                                            \r", temperature, fan_speed);
+				clearBuffer();
+				sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage]                   \r", temperature, fan_speed);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		  case 2:
-				sprintf(screen_message, "Insert temperature to reach [000 - 300] %c%c%c                                                                  \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				clearBuffer();
+				sprintf(screen_message, "\r Insert temperature to reach [000 - 300] %c%c%c                      \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 			case 3:
-				sprintf(screen_message, "Insert fan speed [000 - 100] %c%c%c                                                                             \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				clearBuffer();
+				sprintf(screen_message, "Insert fan speed [000 - 100] %c%c%c                                    \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		}
 	}
 	HAL_TIM_Base_Start_IT(htim);
 }
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
