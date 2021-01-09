@@ -56,10 +56,11 @@
 uint8_t screen = 0;
 uint8_t uartRx;
 float temperature;
-float pv = 45.0;
+extern uint16_t PVT;
+extern uint8_t fan_speed;
 #define PID_PARAM_KP        100            /* Proporcional */
-#define PID_PARAM_KI        0.025        /* Integral */
-#define PID_PARAM_KD        20            /* Derivative */
+#define PID_PARAM_KI        0.025          /* Integral */
+#define PID_PARAM_KD        20             /* Derivative */
 bmp_t bmp_measure;
 /* USER CODE END PV */
 
@@ -106,8 +107,7 @@ void arm_pid_init_f32(
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//uint8_t pData[20] = "Hello world!";
-	
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -134,8 +134,9 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 	bmp_init (&bmp_measure);
+	HAL_TIM_PWM_Init(&htim2);
+	HAL_TIM_PWM_Init(&htim3);
 	HAL_UART_Transmit(&huart5, (uint8_t*)"Welcome Programmable Industrial Oven\r\n", 38, HAL_MAX_DELAY);
-	//sprintf(screen_message, "Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed\r\n");
 	HAL_UART_Transmit(&huart5, (uint8_t*)"Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed\r\n", 110, HAL_MAX_DELAY);
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
@@ -150,13 +151,28 @@ int main(void)
 	
 	arm_pid_init_f32(&PID, 1);
 	float tmp_sensor[4];
-	//char screen_message[150];
+	
+  /*Start PWMs*/
+	TIM_OC_InitTypeDef sConfigOCPV;
+	sConfigOCPV.OCMode = TIM_OCMODE_PWM1;
+	sConfigOCPV.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOCPV.OCFastMode = TIM_OCFAST_DISABLE;
+	
+	TIM_OC_InitTypeDef sConfigOCFAN;
+	sConfigOCFAN.OCMode = TIM_OCMODE_PWM1;
+	sConfigOCFAN.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOCFAN.OCFastMode = TIM_OCFAST_DISABLE;
+	
+	//Start timers.
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		//Read data from sensors.
 		tmp_sensor[0] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_A);
 		HAL_Delay(25);
 		tmp_sensor[1] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_B);
@@ -164,17 +180,31 @@ int main(void)
 		tmp_sensor[2] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_C);
 		HAL_Delay(25);
 		tmp_sensor[3] = get_temp(&bmp_measure, BMP_ADDR_SENSOR_D);
-		
+		//Average the data.
 		temperature = (tmp_sensor[0] + tmp_sensor[1] + tmp_sensor[2] + tmp_sensor[3])/4;
 		
-		pid_error = temperature - pv;
+		//PID routine.
+		pid_error = temperature - (float)PVT;
+		
 		duty = arm_pid_f32(&PID, pid_error);
 		if (duty > 100) {
 				duty = 100;
 		} else if (duty < 0) {
 				duty = 0;
 		}
-		
+		//Set structure for HAL PWM. Duty cycle for PVT. 
+		sConfigOCPV.Pulse = duty;
+		if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOCPV, TIM_CHANNEL_1) != HAL_OK)
+		{
+			_Error_Handler(__FILE__, __LINE__);
+		}
+		//Set structure for HAL PWM. Duty cycle for Fan Speed. 
+		sConfigOCFAN.Pulse = fan_speed;
+		if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOCFAN, TIM_CHANNEL_1) != HAL_OK)
+		{
+			_Error_Handler(__FILE__, __LINE__);
+		}
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -255,6 +285,14 @@ void SystemClock_Config(void)
 void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+	char screen_message[40];
+	sprintf(screen_message, "An error occour, the application is alted.\r\n");
+	HAL_UART_Transmit(&huart5, (uint8_t*)screen_message, sizeof(screen_message), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)file, sizeof(file), HAL_MAX_DELAY);
+	//If error occour stop all timers.
+	HAL_TIM_Base_Stop_IT(&htim6);
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
   /* User can add his own implementation to report the HAL error return state */
   while(1)
   {

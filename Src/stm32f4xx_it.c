@@ -44,7 +44,7 @@ extern uint8_t screen;
 char screen_message[150];
 uint8_t fan_speed = 50;
 uint8_t idx = 0;
-uint8_t PVT = 0;
+uint16_t PVT = 0;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -116,10 +116,10 @@ void clearBuffer() {
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart->Instance == UART5)
+  if (huart->Instance == UART5)//UART 5 interrupt routine.
   {
 		switch (screen) {
-			case 0:
+			case 0:	//Welcome screen.
 				if (uartRx == '1')
 					screen = 1;
 				else if (uartRx == '2')
@@ -129,7 +129,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				else
 					screen = 0;
 				break;
-			case 1:
+			case 1://Show Temperature and Fan screen.
 				if (uartRx == '0')
 					screen = 0;
 				else if (uartRx == '2') 
@@ -137,45 +137,63 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				else if (uartRx == '3') 
 					screen = 3;
 				break;
-			case 2:
-				if (idx == 0 || idx == 1) {
-					screen = 2;
-					uartRxBuffer[idx] = uartRx-48;
-					screen_buffer[idx]= uartRx-48;
-					idx ++;
-				} else if(idx == 2) {
-					PVT = uartRxBuffer[0]*100 + uartRxBuffer[1]*10 + uartRxBuffer[2];
-					idx = 0;
-					screen = 1;
-					uartRxBuffer[0] = 0;
-					uartRxBuffer[1] = 0;
-					uartRxBuffer[2] = 0;
-					screen_buffer[0] = -48;
-					screen_buffer[1] = -48;
-					screen_buffer[2] = -48;
+			case 2://Insert temperature value screen.
+				if (uartRx < 48 || uartRx > 57) {
+					screen = 4;
+				} else {	
+					if (idx == 0 || idx == 1) {
+						screen = 2;
+						uartRxBuffer[idx] = uartRx-48;
+						screen_buffer[idx]= uartRx-48;
+						idx ++;
+					} else if(idx == 2) {
+						PVT = (uint16_t)(uartRxBuffer[0])*100 + (uint16_t)(uartRxBuffer[1])*10 + (uint16_t)(uartRxBuffer[2]);
+						if (PVT > 300)
+							PVT = 300;
+						//DELETE.
+						sprintf(screen_message, "PVT : %f                          \r\n", (float)PVT);
+						HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+						idx = 0;
+						screen = 1;
+						uartRxBuffer[0] = 0;
+						uartRxBuffer[1] = 0;
+						uartRxBuffer[2] = 0;
+						screen_buffer[0] = -48;
+						screen_buffer[1] = -48;
+						screen_buffer[2] = -48;
+					}
 				}
 				break;
-			case 3:
-				if (idx == 0 || idx == 1) {
-					screen = 3;
-					uartRxBuffer[idx] = uartRx-48;
-					screen_buffer[idx]= uartRx-48;
-					idx ++;
-				} else if(idx == 2) {
-					fan_speed = uartRxBuffer[0]*100 + uartRxBuffer[1]*10 + uartRxBuffer[2];
-					if (fan_speed > 100)
-						fan_speed = 100;
-					idx = 0;
-					screen = 1;
-					uartRxBuffer[0] = 0;
-					uartRxBuffer[1] = 0;
-					uartRxBuffer[2] = 0;
-					screen_buffer[0] = -48;
-					screen_buffer[1] = -48;
-					screen_buffer[2] = -48;
+			case 3://Fan speed screen.
+				if (uartRx < 48 || uartRx > 57) {
+					screen = 4;
+				} else {	
+					if (idx == 0 || idx == 1) {
+						screen = 3;
+						uartRxBuffer[idx] = uartRx-48;
+						screen_buffer[idx]= uartRx-48;
+						idx ++;
+					} else if(idx == 2) {
+						fan_speed = uartRxBuffer[0]*100 + uartRxBuffer[1]*10 + uartRxBuffer[2];
+						if (fan_speed > 100)
+							fan_speed = 100;
+						idx = 0;
+						screen = 1;
+						uartRxBuffer[0] = 0;
+						uartRxBuffer[1] = 0;
+						uartRxBuffer[2] = 0;
+						screen_buffer[0] = -48;
+						screen_buffer[1] = -48;
+						screen_buffer[2] = -48;
+					}
 				}
 				break;
-				
+			case 4://Error screen.
+				screen = 0;
+				break;
+			default:
+				screen = 0;
+				break;
 		}//END CASE.
 		HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
   }//END UART5 INTERRUPT.
@@ -187,24 +205,29 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 
 	if (htim->Instance == TIM6){
 		switch (screen) {
-			case 0:
+			case 0://Display welcoome screen.
 				clearBuffer();	
-				sprintf(screen_message, "Select an operation                                                   \r");
+				sprintf(screen_message, "Select an operation                                                    \r");
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
-			case 1:
+			case 1://Show Temperature and Fan screen.
 				clearBuffer();
-				sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage]                   \r", temperature, fan_speed);
+				sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage]                    \r", temperature, fan_speed);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
-		  case 2:
+		  case 2://Insert temperature value screen.
 				clearBuffer();
-				sprintf(screen_message, "\r Insert temperature to reach [000 - 300] %c%c%c                      \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				sprintf(screen_message, "Insert temperature to reach [000 - 300] %c%c%c                          \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
-			case 3:
+			case 3://Fan speed screen.
 				clearBuffer();
-				sprintf(screen_message, "Insert fan speed [000 - 100] %c%c%c                                    \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				sprintf(screen_message, "Insert fan speed [000 - 100] %c%c%c                                     \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+				break;
+			case 4://Error screen.
+				clearBuffer();
+				sprintf(screen_message, "Error, '%c' is not a valid input character. Press any key to continue... \r", uartRx);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		}
