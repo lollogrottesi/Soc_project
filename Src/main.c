@@ -58,6 +58,7 @@ uint8_t uartRx;
 float temperature;
 extern uint16_t PVT;
 extern uint8_t fan_speed;
+float duty = 0;
 #define PID_PARAM_KP        100            /* Proporcional */
 #define PID_PARAM_KI        0.025          /* Integral */
 #define PID_PARAM_KD        20             /* Derivative */
@@ -142,7 +143,6 @@ int main(void)
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
 	/* PID */
 	float pid_error;
-	float duty = 0;
 	arm_pid_instance_f32 PID;
 	
 	PID.Kp = PID_PARAM_KD;
@@ -186,7 +186,7 @@ int main(void)
 		//PID routine.
 		pid_error = temperature - (float)PVT;
 		
-		duty = arm_pid_f32(&PID, pid_error);
+		duty = 100 - (arm_pid_f32(&PID, pid_error));
 		if (duty > 100) {
 				duty = 100;
 		} else if (duty < 0) {

@@ -41,6 +41,7 @@ int screen_buffer[3] = {-48, -48, -48};
 extern uint8_t uartRx;
 extern float temperature;
 extern uint8_t screen;
+extern float duty;
 char screen_message[150];
 uint8_t fan_speed = 50;
 uint8_t idx = 0;
@@ -151,8 +152,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						if (PVT > 300)
 							PVT = 300;
 						//DELETE.
-						sprintf(screen_message, "PVT : %f                          \r\n", (float)PVT);
-						HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+						//sprintf(screen_message, "PVT : %f                          \r\n", (float)PVT);
+						//HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 						idx = 0;
 						screen = 1;
 						uartRxBuffer[0] = 0;
@@ -212,7 +213,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 				break;
 			case 1://Show Temperature and Fan screen.
 				clearBuffer();
-				sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage]                    \r", temperature, fan_speed);
+			  sprintf(screen_message, "Temperature : %f [Celsus] Fan speed: %d [percentage] Actuator PWM: %d  \r", temperature, fan_speed, (uint8_t)duty);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		  case 2://Insert temperature value screen.

@@ -20,7 +20,7 @@ sysbus.i2c3.sensorA SetEnvironment envA
 sysbus.i2c3.sensorB SetEnvironment envB
 sysbus.i2c3.sensorC SetEnvironment envC
 sysbus.i2c3.sensorD SetEnvironment envD
-$bin?="C:\Users\lorenzo\Documents\Universit\magistrale\System on chip architecture\TEST_RENODE\MDK-ARM\TEST_RENODE\TEST_RENODE.axf"
+$bin?="C:\Users\Nicolò\Desktop\Soc_project\MDK-ARM\TEST_RENODE\TEST_RENODE.axf"
 
 macro reset
 """
