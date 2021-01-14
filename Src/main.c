@@ -138,7 +138,13 @@ int main(void)
 	HAL_TIM_PWM_Init(&htim2);
 	HAL_TIM_PWM_Init(&htim3);
 	HAL_UART_Transmit(&huart5, (uint8_t*)"Welcome Programmable Industrial Oven\r\n", 38, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart5, (uint8_t*)"Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed (4)Insert temperature for a given time\r\n", 160, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(&huart5, (uint8_t*)"Avaible operations: (1)Show Current Temperature and Fan status(2)Insert target temperature(3)Set fan speed (4)Insert temperature for a given time\r\n", 160, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"Avaible operations:\r\n", strlen("Avaible operations:\r\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"(1)Show Current Temperature and Fan status\r\n", strlen("(1)Show Current Temperature and Fan status\r\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"(2)Insert target temperature\r\n", strlen("(2)Insert target temperature\r\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"(3)Set fan speed\r\n", strlen("(3)Set fan speed\r\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"(4)Insert temperature for a given time\r\n", strlen("(4)Insert temperature for a given time\r\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart5, (uint8_t*)"(5)Show status of PVT and Timer\r\n", strlen("(5)Show status of PVT and Timer\r\n"), HAL_MAX_DELAY);
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_UART_Receive_IT(&huart5, &uartRx, sizeof(uartRx));
 	/* PID */

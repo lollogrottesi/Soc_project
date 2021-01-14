@@ -51,6 +51,7 @@ uint16_t tmp_PVT = 0;
 uint16_t usrTime = 0;
 uint16_t tmp_usrTime = 0;
 uint8_t flag_usrTime = 0;
+uint32_t time_cnt = 0;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -134,6 +135,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					screen = 3;
 				else if (uartRx == '4')
 					screen = 7;
+				else if (uartRx == '5')
+					screen = 9;
 				else
 					screen = 0;
 				break;
@@ -146,6 +149,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					screen = 3;
 				else if (uartRx == '4')
 					screen = 7;
+				else if (uartRx == '5')
+					screen = 9;
 				break;
 			case 2://Insert temperature value screen.
 				if (uartRx < 48 || uartRx > 57) {
@@ -157,6 +162,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						screen_buffer[idx]= uartRx-48;
 						idx ++;
 					} else if(idx == 2) {
+						uartRxBuffer[idx] = uartRx-48;
 						tmp_PVT = (uint16_t)(uartRxBuffer[0])*100 + (uint16_t)(uartRxBuffer[1])*10 + (uint16_t)(uartRxBuffer[2]);
 						if (tmp_PVT > 300)
 							tmp_PVT = 300;
@@ -181,6 +187,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						screen_buffer[idx]= uartRx-48;
 						idx ++;
 					} else if(idx == 2) {
+						uartRxBuffer[idx] = uartRx-48;
 						tmp_fan_speed = uartRxBuffer[0]*100 + uartRxBuffer[1]*10 + uartRxBuffer[2];
 						if (tmp_fan_speed > 100)
 							tmp_fan_speed = 100;
@@ -197,6 +204,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				break;
 			case 4://Error screen.
 				screen = 0;
+				uartRxBuffer[0] = 0;
+				uartRxBuffer[1] = 0;
+				uartRxBuffer[2] = 0;
+				screen_buffer[0] = -48;
+				screen_buffer[1] = -48;
+				screen_buffer[2] = -48;
+				idx = 0;
 				break;
 			case 5://Confirmation of PV screen.
 				if (uartRx == 'y'){
@@ -231,6 +245,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						screen_buffer[idx]= uartRx-48;
 						idx ++;
 					} else if(idx == 2) {
+						uartRxBuffer[idx]= uartRx-48;
 						tmp_usrTime = (uint16_t)(uartRxBuffer[0])*100 + (uint16_t)(uartRxBuffer[1])*10 + (uint16_t)(uartRxBuffer[2]);
 						if (tmp_usrTime > 500)
 							tmp_usrTime = 500;
@@ -245,10 +260,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 					}
 				}
 				break;
-			case 8://Confirmation of fan screen.
+			case 8://Confirmation of program temprature and timer..
 				if (uartRx == 'y'){
 					usrTime = tmp_usrTime;
 					flag_usrTime = 1;
+					time_cnt = 0;
 					screen = 2;
 				}
 				else if(uartRx == 'n') {
@@ -317,14 +333,36 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 				sprintf(screen_message, " The timer is set to %d minutes, confirm?[y/n]                                          \r", tmp_usrTime);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
+		 case 9://Show PVT and Timer.
+				clearBuffer();
+				if (flag_usrTime == 0) {
+					sprintf(screen_message, " PVT : %d , Timer : %d [disable]                                                      \r", PVT, usrTime);
+					HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+				} else {
+					sprintf(screen_message, " PVT : %d , Timer : %d [enable], timeCnt: %d                                                     \r", PVT, usrTime, time_cnt);
+					HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
+				}
+				break;
 		 default://Default screen.
 				clearBuffer();	
 				sprintf(screen_message, " Select an operation                                                                     \r");
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		 
+		}//END SWITCH.
+		if (flag_usrTime == 1){ //Routine for oven tmer.
+			time_cnt++; //Update time_cnt every 100ms.
+			if (time_cnt == 600) { //100ms*600000 = 1min.
+				usrTime--;
+				time_cnt = 0;
+				if (usrTime <= 0) {
+					PVT = 0;
+					flag_usrTime = 0;
+					usrTime = 0;
+				}
+			}
 		}
-	}
+	}//END TIMER6 INTEERUPT ROUTINE.
 	HAL_TIM_Base_Start_IT(htim);
 }
 
