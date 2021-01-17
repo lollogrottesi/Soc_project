@@ -1,4 +1,4 @@
---cpu=Cortex-M4.fp
+--cpu=Cortex-M4.fp.sp
 "test_renode\startup_stm32f429xx.o"
 "test_renode\bmp180.o"
 "test_renode\main.o"
