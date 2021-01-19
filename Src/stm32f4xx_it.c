@@ -290,42 +290,42 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 		switch (screen) {
 			case 0://Display welcome screen.
 				clearBuffer();	
-				sprintf(screen_message, " Select an operation                                                     \r");
+				sprintf(screen_message, " Select an operation                                                            \r");
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 			case 1://Show Temperature and Fan screen.
 				clearBuffer();
-			  sprintf(screen_message, " Temperature : %f [Celsus] Fan speed: %d [percentage] Actuator PWM: %d   \r", temperature, fan_speed, (uint8_t)duty);
+			  sprintf(screen_message, " Temperature : %f [Celsius] Fan speed: %d [Perc] Actuator PWM: %d   \r", temperature, fan_speed, (uint8_t)duty);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		  case 2://Insert temperature value screen.
 				clearBuffer();
-				sprintf(screen_message, " Insert temperature to reach [000 - 300] %c%c%c                          \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				sprintf(screen_message, " Insert temperature to reach [000 - 300] %c%c%c                                  \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 			case 3://Fan speed screen.
 				clearBuffer();
-				sprintf(screen_message, " Insert fan speed [000 - 100] %c%c%c                                     \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				sprintf(screen_message, " Insert fan speed [000 - 100] %c%c%c                                              \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 			case 4://Error screen.
 				clearBuffer();
-				sprintf(screen_message, " Error, '%c' is not a valid input character. Press any key to continue...\r", uartRx);
+				sprintf(screen_message, " Error, '%c' is not a valid input character. Press any key to continue...         \r", uartRx);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		 case 5://Confimation PV.
 				clearBuffer();
-				sprintf(screen_message, " The projected value fot the temperatire is %d confirm?[y/n]             \r", tmp_PVT);
+				sprintf(screen_message, " The projected value fot the temperatire is %d confirm?[y/n]                 \r", tmp_PVT);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		 case 6://Confirmation fan.
 				clearBuffer();
-				sprintf(screen_message, " The fan speed %d confirm?[y/n]                                          \r", tmp_fan_speed);
+				sprintf(screen_message, " The fan speed %d confirm?[y/n]                                              \r", tmp_fan_speed);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		 case 7://Insert timer.
 				clearBuffer();
-				sprintf(screen_message, " Insert timer value, in minutes [000 - 500] %c%c%c                       \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
+				sprintf(screen_message, " Insert timer value, in minutes [000 - 500] %c%c%c                               \r", screen_buffer[0]+48,screen_buffer[1]+48, screen_buffer[2]+48);
 				HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				break;
 		 case 8://Confirmation Timer.
@@ -336,10 +336,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim){
 		 case 9://Show PVT and Timer.
 				clearBuffer();
 				if (flag_usrTime == 0) {
-					sprintf(screen_message, " PVT : %d , Timer : %d [disable]                                       \r", PVT, usrTime);
+					sprintf(screen_message, " PVT : %d , Timer : %d [disable]                                              \r", PVT, usrTime);
 					HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				} else {
-					sprintf(screen_message, " PVT : %d , Timer : %d [enable], timeCnt: %d                           \r", PVT, usrTime, time_cnt);
+					sprintf(screen_message, " PVT : %d , Timer : %d [enable]                                               \r", PVT, usrTime);
 					HAL_UART_Transmit_IT(&huart5, (uint8_t*)screen_message, sizeof(screen_message));
 				}
 				break;
